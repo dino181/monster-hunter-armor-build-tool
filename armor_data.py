@@ -72,7 +72,7 @@ def _get_remote_armor_data(url: str = ARMOR_DATA_URL) -> dict[str, Any]:
     armor_pieces = response.json()
     for armor_piece in armor_pieces:
         try:
-            name = armor_piece["armorSet"]["name"]
+            name = armor_piece["armorSet"]["name"].lower().replace(" ", "-")
             rank = armor_piece["rank"]
             armor_type = armor_piece["type"]
             skills = armor_piece["skills"]

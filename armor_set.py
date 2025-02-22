@@ -1,4 +1,5 @@
 from enum import Enum, auto
+from typing import Any, Self
 
 
 class ArmorType(Enum):
@@ -11,9 +12,16 @@ class ArmorType(Enum):
 
 
 class ArmorRank(Enum):
-    LR = auto()
-    HR = auto()
-    MR = auto()
+    LR = "low"
+    HR = "high"
+    MR = "master"
+
+    @staticmethod
+    def from_str(value: str) -> Self:
+        for rank in ArmorRank:
+            if rank.value == value:
+                return rank
+        raise ValueError(f"Could not convert {value} to ArmorRank enum")
 
 
 class ArmorPiece:
@@ -33,6 +41,22 @@ class ArmorPiece:
         self.rank = rank
         self.buffs = buffs  # NOTE: Buff as class with name/level/max level?
         self.slots = slots
+
+    @staticmethod
+    def new(
+        armor_type: ArmorType, rank: ArmorRank, name: str, armor_data: dict[str, Any]
+    ) -> Self | None:
+        piece_data = armor_data[rank].get(name)
+        if piece_data is None:
+            return None
+
+        return ArmorPiece(
+            armor_type=ArmorType.HELM,
+            rank=ArmorRank.from_str(rank),
+            name=name,
+            slots=piece_data.get("slots", [0, 0, 0, 0]),
+            buffs=piece_data.get("buffs", {}),
+        )
 
     def __repr__(self) -> str:
         return f"ArmorPiece(rank={self.rank.name}, name={self.name}, type={self.armor_type.name})"

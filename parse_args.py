@@ -19,7 +19,13 @@ def parse_args() -> argparse.Namespace:
         choices=["low", "high", "master"],
         help="The rank of the armor ",
     )
-
+    group_create.add_argument(
+        "-n",
+        "--name",
+        required="create" in sys.argv,
+        type=str,
+        help="The name for the armor set",
+    )
     group_create.add_argument(
         "--helm",
         type=str,

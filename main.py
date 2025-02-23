@@ -11,6 +11,7 @@ def main():
     match args.action:
         case "create":
             armor_set = ArmorSet(
+                name=args.name,
                 helm=ArmorPiece.new(ArmorType.HELM, args.rank, args.helm, armor_data),
                 chest=ArmorPiece.new(
                     ArmorType.CHEST,

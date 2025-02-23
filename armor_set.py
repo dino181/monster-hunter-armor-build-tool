@@ -44,8 +44,11 @@ class ArmorPiece:
 
     @staticmethod
     def new(
-        armor_type: ArmorType, rank: ArmorRank, name: str, armor_data: dict[str, Any]
+        armor_type: ArmorType, rank: str, name: str, armor_data: dict[str, Any]
     ) -> Self | None:
+        if rank not in armor_data.keys():
+            raise ValueError(f"rank must be one of: {list(armor_data.keys())}")
+
         piece_data = armor_data[rank].get(name)
         if piece_data is None:
             return None
@@ -61,10 +64,35 @@ class ArmorPiece:
     def __repr__(self) -> str:
         return f"ArmorPiece(rank={self.rank.name}, name={self.name}, type={self.armor_type.name})"
 
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "type": self.armor_type,
+            "rank": self.rank.value,
+            "buffs": self.buffs,
+            "slots": self.slots,
+        }
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> Self:
+        try:
+            return ArmorPiece(
+                name=data["name"],
+                armor_type=data["type"],
+                rank=ArmorRank.from_str(data["rank"]),
+                buffs=data["buffs"],
+                slots=data["slots"],
+            )
+        except (KeyError, ValueError) as exc:
+            raise ValueError(
+                f"dict: {data} is not a valid dictionary for an armor piece. {exc}"
+            )
+
 
 class ArmorSet:
     def __init__(
         self,
+        name: str,
         helm: ArmorPiece | None = None,
         chest: ArmorPiece | None = None,
         arm: ArmorPiece | None = None,
@@ -72,6 +100,7 @@ class ArmorSet:
         leg: ArmorPiece | None = None,
         charm: ArmorPiece | None = None,
     ) -> None:
+        self.name = name
         self.helm = helm
         self.chest = chest
         self.arm = arm
@@ -110,6 +139,7 @@ class ArmorSet:
 
     def __repr__(self) -> str:
         return f"""ArmorSet(
+            name={self.name}
             helm={self.helm}
             chest={self.chest}
             arm={self.arm}
@@ -117,3 +147,30 @@ class ArmorSet:
             leg={self.leg}
             charm={self.charm}
         )"""
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "name": self.name,
+            "helm": self.helm.to_dict(),
+            "chest": self.chest.to_dict(),
+            "arm": self.arm.to_dict(),
+            "waist": self.waist.to_dict(),
+            "leg": self.leg.to_dict(),
+        }
+
+    @staticmethod
+    def from_dict(data: dict[str, Any]) -> Self:
+        try:
+            return ArmorSet(
+                name=data["name"],
+                helm=ArmorPiece.from_dict(data["helm"]),
+                chest=ArmorPiece.from_dict(data["chest"]),
+                arm=ArmorPiece.from_dict(data["arm"]),
+                waist=ArmorPiece.from_dict(data["waist"]),
+                leg=ArmorPiece.from_dict(data["leg"]),
+            )
+
+        except (KeyError, ValueError):
+            raise ValueError(
+                f"dict: {data} is not a valid dictionary for an armor set. {exc}"
+            )

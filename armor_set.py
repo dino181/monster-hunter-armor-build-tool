@@ -1,14 +1,21 @@
-from enum import Enum, auto
+from enum import Enum
 from typing import Any, Self
 
 
 class ArmorType(Enum):
-    HELM = auto()
-    CHEST = auto()
-    ARM = auto()
-    WAIST = auto()
-    LEG = auto()
-    CHARM = auto()
+    HELM = "helm"
+    CHEST = "chest"
+    ARM = "arm"
+    WAIST = "waist"
+    LEG = "leg"
+    CHARM = "charm"
+
+    @staticmethod
+    def from_str(value: str) -> Self:
+        for rank in ArmorType:
+            if rank.value == value:
+                return rank
+        raise ValueError(f"Could not convert {value} to ArmorType enum")
 
 
 class ArmorRank(Enum):
@@ -67,18 +74,20 @@ class ArmorPiece:
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
-            "type": self.armor_type,
+            "type": self.armor_type.value,
             "rank": self.rank.value,
             "buffs": self.buffs,
             "slots": self.slots,
         }
 
     @staticmethod
-    def from_dict(data: dict[str, Any]) -> Self:
+    def from_dict(data: dict[str, Any]) -> Self | None:
+        if not data:
+            return None
         try:
             return ArmorPiece(
                 name=data["name"],
-                armor_type=data["type"],
+                armor_type=ArmorType.from_str(data["type"]),
                 rank=ArmorRank.from_str(data["rank"]),
                 buffs=data["buffs"],
                 slots=data["slots"],
@@ -151,11 +160,11 @@ class ArmorSet:
     def to_dict(self) -> dict[str, Any]:
         return {
             "name": self.name,
-            "helm": self.helm.to_dict(),
-            "chest": self.chest.to_dict(),
-            "arm": self.arm.to_dict(),
-            "waist": self.waist.to_dict(),
-            "leg": self.leg.to_dict(),
+            "helm": self.helm.to_dict() if self.helm else None,
+            "chest": self.chest.to_dict() if self.chest else None,
+            "arm": self.arm.to_dict() if self.arm else None,
+            "waist": self.waist.to_dict() if self.waist else None,
+            "leg": self.leg.to_dict() if self.leg else None,
         }
 
     @staticmethod
@@ -170,7 +179,7 @@ class ArmorSet:
                 leg=ArmorPiece.from_dict(data["leg"]),
             )
 
-        except (KeyError, ValueError):
+        except (KeyError, ValueError) as exc:
             raise ValueError(
-                f"dict: {data} is not a valid dictionary for an armor set. {exc}"
+                f"dict: {data} is not a valid dictionary for an armor set. \n{exc}"
             )

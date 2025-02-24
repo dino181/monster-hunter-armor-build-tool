@@ -1,4 +1,5 @@
-from armor_data import load_armor_data, sync_armor_data
+from armor_data import (load_armor_data, load_armor_sets, save_armor_sets,
+                        sync_armor_data)
 from armor_set import ArmorPiece, ArmorSet, ArmorType
 from parse_args import parse_args
 
@@ -7,6 +8,7 @@ def main():
     args = parse_args()
     sync_armor_data()
     armor_data = load_armor_data()
+    armor_sets = load_armor_sets()
 
     match args.action:
         case "create":
@@ -28,7 +30,8 @@ def main():
                 ),
                 leg=ArmorPiece.new(ArmorType.LEG, args.rank, args.leg, armor_data),
             )
-            print(armor_set)
+            armor_sets.append(armor_set)
+            save_armor_sets(armor_sets)
         case "edit":
             return
         case "compare":

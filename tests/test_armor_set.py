@@ -135,3 +135,280 @@ def test_armor_rank_from_str(rank, expected):
 def test_armor_rank_from_str_invalid():
     with pytest.raises(ValueError):
         ArmorRank.from_str("this is not a rank")
+
+
+@pytest.mark.parametrize(
+    "armor_type, expected",
+    [
+        ("helm", ArmorType.HELM),
+        ("chest", ArmorType.CHEST),
+        ("arm", ArmorType.ARM),
+        ("waist", ArmorType.WAIST),
+        ("leg", ArmorType.LEG),
+        ("charm", ArmorType.CHARM),
+    ],
+)
+def test_armor_type_from_str(armor_type, expected):
+    result = ArmorType.from_str(armor_type)
+    assert result == expected
+
+
+def test_armor_type_from_str_invalid():
+    with pytest.raises(ValueError):
+        ArmorType.from_str("this is not a type")
+
+
+def test_armor_piece_from_dict():
+    data = {
+        "name": "test",
+        "type": "helm",
+        "rank": "master",
+        "buffs": {},
+        "slots": [0, 0, 0, 0],
+    }
+    result = ArmorPiece.from_dict(data)
+    assert result.name == "test"
+    assert result.armor_type == ArmorType.HELM
+    assert result.rank == ArmorRank.MR
+    assert result.buffs == {}
+    assert result.slots == [0, 0, 0, 0]
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "type": "helm",
+            "rank": "master",
+            "buffs": {},
+            "slots": [0, 0, 0, 0],
+        },
+        {
+            "name": "test",
+            "rank": "master",
+            "buffs": {},
+            "slots": [0, 0, 0, 0],
+        },
+        {
+            "name": "test",
+            "type": "helm",
+            "buffs": {},
+            "slots": [0, 0, 0, 0],
+        },
+        {
+            "name": "test",
+            "type": "helm",
+            "rank": "master",
+            "slots": [0, 0, 0, 0],
+        },
+        {
+            "name": "test",
+            "type": "helm",
+            "rank": "master",
+            "buffs": {},
+        },
+        {
+            "name": "test",
+            "type": "helm",
+            "rank": "not a rank",
+            "buffs": {},
+            "slots": [0, 0, 0, 0],
+        },
+        {
+            "name": "test",
+            "type": "not a type",
+            "rank": "master",
+            "buffs": {},
+            "slots": [0, 0, 0, 0],
+        },
+        {
+            "name": "test",
+            "type": "not a type",
+            "rank": "master",
+            "buffs": {},
+            "slots": [0, 0, 0, 0, 0],
+        },
+        {
+            "name": "test",
+            "type": "not a type",
+            "rank": "master",
+            "buffs": {},
+            "slots": [0, 0, 0],
+        },
+    ],
+)
+def test_armor_piece_from_dict_invalid_dict(data):
+    with pytest.raises(ValueError):
+        ArmorPiece.from_dict(data)
+
+
+@pytest.mark.parametrize("data", [{}, None])
+def test_armor_piece_from_dict_no_data(data):
+    assert ArmorPiece.from_dict(data) is None
+
+
+def test_armor_piece_to_dict():
+    armor_piece = ArmorPiece(
+        armor_type=ArmorType.HELM,
+        name="test",
+        rank=ArmorRank.MR,
+        buffs={"some buff": 3},
+        slots=[1, 0, 0, 2],
+    )
+    assert armor_piece.to_dict() == {
+        "type": "helm",
+        "name": "test",
+        "rank": "master",
+        "buffs": {"some buff": 3},
+        "slots": [1, 0, 0, 2],
+    }
+
+
+def test_armor_set_to_dict(armor_set: ArmorSet):
+    expected = {
+        "name": "test-set",
+        "helm": {
+            "type": "helm",
+            "name": "Piece 1",
+            "rank": "master",
+            "slots": [0, 0, 0, 0],
+            "buffs": {"buff 1": 2},
+        },
+        "chest": {
+            "type": "chest",
+            "name": "Piece 2",
+            "rank": "master",
+            "slots": [1, 0, 0, 0],
+            "buffs": {"buff 1": 2},
+        },
+        "arm": {
+            "type": "arm",
+            "name": "Piece 3",
+            "rank": "master",
+            "slots": [1, 1, 1, 1],
+            "buffs": {"buff 2": 1},
+        },
+        "waist": {
+            "type": "waist",
+            "name": "Piece 4",
+            "rank": "master",
+            "slots": [0, 0, 2, 0],
+            "buffs": {"buff 3": 3},
+        },
+        "leg": {
+            "type": "leg",
+            "name": "Piece 5",
+            "rank": "master",
+            "slots": [2, 0, 0, 0],
+            "buffs": {},
+        },
+    }
+
+    assert armor_set.to_dict() == expected
+
+
+def test_armor_set_to_dict_no_pieces():
+    armor_set = ArmorSet("test")
+    assert armor_set.to_dict() == {
+        "name": "test",
+        "helm": None,
+        "chest": None,
+        "arm": None,
+        "waist": None,
+        "leg": None,
+    }
+
+
+def test_armor_set_from_dict():
+    data = {
+        "name": "test-set",
+        "helm": {
+            "type": "helm",
+            "name": "Piece 1",
+            "rank": "master",
+            "slots": [0, 0, 0, 0],
+            "buffs": {"buff 1": 2},
+        },
+        "chest": {
+            "type": "chest",
+            "name": "Piece 2",
+            "rank": "master",
+            "slots": [1, 0, 0, 0],
+            "buffs": {"buff 1": 2},
+        },
+        "arm": {
+            "type": "arm",
+            "name": "Piece 3",
+            "rank": "master",
+            "slots": [1, 1, 1, 1],
+            "buffs": {"buff 2": 1},
+        },
+        "waist": {
+            "type": "waist",
+            "name": "Piece 4",
+            "rank": "master",
+            "slots": [0, 0, 2, 0],
+            "buffs": {"buff 3": 3},
+        },
+        "leg": None,
+    }
+    result = ArmorSet.from_dict(data)
+    assert result.name == "test-set"
+    assert result.helm.name == "Piece 1"
+    assert result.chest.name == "Piece 2"
+    assert result.arm.name == "Piece 3"
+    assert result.waist.name == "Piece 4"
+    assert result.leg is None
+
+
+@pytest.mark.parametrize(
+    "data",
+    [
+        {
+            "helm": None,
+            "chest": None,
+            "arm": None,
+            "waist": None,
+            "leg": None,
+        },
+        {
+            "name": "test-set",
+            "chest": None,
+            "arm": None,
+            "waist": None,
+            "leg": None,
+        },
+        {
+            "name": "test-set",
+            "helm": None,
+            "arm": None,
+            "waist": None,
+            "leg": None,
+        },
+        {
+            "name": "test-set",
+            "helm": None,
+            "chest": None,
+            "waist": None,
+            "leg": None,
+        },
+        {
+            "name": "test-set",
+            "helm": None,
+            "chest": None,
+            "arm": None,
+            "leg": None,
+        },
+        {
+            "name": "test-set",
+            "helm": None,
+            "chest": None,
+            "arm": None,
+            "waist": None,
+        },
+        {},
+    ],
+)
+def test_armor_set_from_dict_invalid_dict(data):
+    with pytest.raises(ValueError):
+        ArmorSet.from_dict(data)

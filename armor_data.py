@@ -4,11 +4,15 @@ from typing import Any
 
 import requests
 
+from armor_set import ArmorSet
+
 ARMOR_DATA_URL = "https://mhw-db.com/armor"
 
 DATA_FOLDER = "./data"
 ARMOR_DATA_FILE = "armor_data.json"
+ARMOR_SET_FILE = "armor_sets.json"
 ARMOR_DATA = os.path.join(DATA_FOLDER, ARMOR_DATA_FILE)
+ARMOR_SET_PATH = os.path.join(DATA_FOLDER, ARMOR_SET_FILE)
 
 
 def sync_armor_data(
@@ -149,3 +153,35 @@ def _save_armor_data(
         json.dump(armor_data, file)
 
     print("Saved armor data.")
+
+
+def save_armor_sets(
+    armor_sets: list[ArmorSet], path: str = DATA_FOLDER, filename: str = ARMOR_SET_FILE
+):
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    try:
+        armor_sets_json = list(map(lambda armor_set: armor_set.to_dict(), armor_sets))
+    except ValueError as exc:
+        print(f"Failed to save armor set: {exc}")
+        return
+
+    with open(os.path.join(path, filename), "w") as file:
+        json.dump(armor_sets_json, file)
+
+
+def load_armor_sets(filepath: str = ARMOR_SET_PATH):
+    if not os.path.exists(filepath):
+        return []
+
+    with open(filepath, "r") as file:
+        try:
+            armor_sets = json.load(file)
+        except json.JSONDecodeError as exc:
+            print(f"failed to load armor sets: {exc}")
+            armor_sets = []
+
+    return list(
+        map(lambda armor_set_dict: ArmorSet.from_dict(armor_set_dict), armor_sets)
+    )

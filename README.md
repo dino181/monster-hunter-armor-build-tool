@@ -3,7 +3,7 @@ This is a cli-tool for creating and comparing armor/weapon sets for the game mon
 It allows you to:
 - Create armor sets
 - List the armor buffs 
-- List the armor piece names
+- List the armor set names
 - List the number and size of decoration slots
 - Manually fill the decoration slots with buffs
 - Compare created armor sets

@@ -75,6 +75,7 @@ def _get_remote_armor_data(url: str = ARMOR_DATA_URL) -> dict[str, Any]:
     armor_data = {"low": {}, "high": {}, "master": {}}
     armor_pieces = response.json()
     for armor_piece in armor_pieces:
+        print(armor_piece)
         try:
             name = armor_piece["armorSet"]["name"].lower().replace(" ", "-")
             rank = armor_piece["rank"]
@@ -95,7 +96,7 @@ def _get_remote_armor_data(url: str = ARMOR_DATA_URL) -> dict[str, Any]:
             print(f"Failed to parse skills {skills}.")
             continue
 
-        if name not in armor_data:
+        if name not in armor_data[rank]:
             armor_data[rank][name] = {}
         armor_data[rank][name][armor_type] = {
             "slots": armor_slots,
